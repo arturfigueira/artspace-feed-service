@@ -5,7 +5,7 @@ import io.quarkus.kafka.client.serialization.ObjectMapperDeserializer;
 /**
  * Default post data deserializer
  */
-class PostDeserializer extends ObjectMapperDeserializer<PostDTO> {
+public class PostDeserializer extends ObjectMapperDeserializer<PostDTO> {
 
   public PostDeserializer() {
     super(PostDTO.class);
