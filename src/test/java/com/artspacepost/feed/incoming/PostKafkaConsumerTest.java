@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import com.artspacepost.feed.Post;
 import com.artspacepost.feed.archive.ArchiveService;
+import com.artspacepost.feed.cache.FeedCacheService;
 import com.github.javafaker.Faker;
 import io.smallrye.mutiny.Uni;
 import java.time.Duration;
@@ -41,6 +42,9 @@ class PostKafkaConsumerTest {
   @Mock
   ArchiveService archiveService;
 
+  @Mock
+  FeedCacheService feedCacheService;
+
   Logger logger = Logger.getLogger(PostKafkaConsumerTest.class);
 
   PostKafkaConsumer consumer;
@@ -59,6 +63,7 @@ class PostKafkaConsumerTest {
     consumer.correlationKey = "correlationId";
     consumer.archiveService = archiveService;
     consumer.logger = logger;
+    consumer.feedCacheService = feedCacheService;
   }
 
   @Test
@@ -71,6 +76,7 @@ class PostKafkaConsumerTest {
 
     //then
     verify(archiveService, never()).archivePost(any(Post.class));
+    verify(feedCacheService, never()).append(any(Post.class));
   }
 
   @ParameterizedTest
@@ -85,6 +91,7 @@ class PostKafkaConsumerTest {
 
     //then
     verify(archiveService, never()).archivePost(any(Post.class));
+    verify(feedCacheService, never()).append(any(Post.class));
   }
 
   @Test
@@ -97,6 +104,7 @@ class PostKafkaConsumerTest {
 
     //then
     verify(archiveService, never()).archivePost(any(Post.class));
+    verify(feedCacheService, never()).append(any(Post.class));
   }
 
   @Test
@@ -105,6 +113,7 @@ class PostKafkaConsumerTest {
     var post = samplePost();
     var message = sampleIncomingMessage(post);
     when(archiveService.archivePost(any(Post.class))).thenReturn(Uni.createFrom().voidItem());
+    when(feedCacheService.append(any(Post.class))).thenReturn(Uni.createFrom().item(true));
 
     //when
     this.consumer.consume(message).await().atMost(ONE_SEC);
@@ -117,6 +126,27 @@ class PostKafkaConsumerTest {
     assertThat(data.getCreationTime(), notNullValue());
     assertTrue(post.isEnabled());
   }
+
+  @Test
+  void consumeShouldCacheMessageData() {
+    //given
+    var post = samplePost();
+    var message = sampleIncomingMessage(post);
+    when(archiveService.archivePost(any(Post.class))).thenReturn(Uni.createFrom().voidItem());
+    when(feedCacheService.append(any(Post.class))).thenReturn(Uni.createFrom().item(true));
+
+    //when
+    this.consumer.consume(message).await().atMost(ONE_SEC);
+
+    //then
+    verify(feedCacheService).append(argumentCaptor.capture());
+    final var data = argumentCaptor.getValue();
+    assertThat(data.getMessage(), is(post.getMessage()));
+    assertThat(data.getAuthor(), is(post.getAuthorUsername()));
+    assertThat(data.getCreationTime(), notNullValue());
+    assertTrue(post.isEnabled());
+  }
+
 
   private static PostDTO samplePost() {
     final var postDto = new PostDTO();

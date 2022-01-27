@@ -1,11 +1,11 @@
 package com.artspacepost.feed.archive;
 
-import static javax.persistence.GenerationType.SEQUENCE;
-
 import java.time.Instant;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -22,7 +22,8 @@ import lombok.ToString;
 @Entity
 class Archive {
   @Id
-  @GeneratedValue(strategy=SEQUENCE, generator="seq_archive_id")
+  @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_archive_id")
+  @SequenceGenerator(name = "seq_archive_id", sequenceName = "seq_archive_id")
   private long id;
 
   @NotBlank
