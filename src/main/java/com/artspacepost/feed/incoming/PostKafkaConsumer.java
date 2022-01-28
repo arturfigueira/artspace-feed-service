@@ -2,7 +2,9 @@ package com.artspacepost.feed.incoming;
 
 import com.artspacepost.feed.Post;
 import com.artspacepost.feed.archive.ArchiveService;
+import com.artspacepost.feed.cache.FeedCacheService;
 import io.smallrye.mutiny.Uni;
+import io.smallrye.reactive.messaging.providers.i18n.ProviderLogging;
 import java.util.Optional;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -29,6 +31,9 @@ public class PostKafkaConsumer implements PostConsumer<ConsumerRecord<String, Po
 
   @Inject
   ArchiveService archiveService;
+
+  @Inject
+  FeedCacheService feedCacheService;
 
   /**
    * Consumes {@link PostDTO} records sent from a kafka broker instance.
@@ -94,7 +99,8 @@ public class PostKafkaConsumer implements PostConsumer<ConsumerRecord<String, Po
         .build();
 
     result = archiveService.archivePost(post)
-        .invoke(a -> logger.infof("[%s] Post %s has been archived", correlationId, post))
+        .invoke(() -> logger.infof("[%s] Post %s has been archived", correlationId, post))
+        .invoke(() -> cacheIt(post, correlationId))
         .onFailure()
         .invoke(throwable -> logger.errorf("[%s] Post %s could not be archived. %s", correlationId,
             post, throwable))
@@ -103,4 +109,14 @@ public class PostKafkaConsumer implements PostConsumer<ConsumerRecord<String, Po
     return result;
   }
 
+  private void cacheIt(final Post post, String correlationId) {
+    feedCacheService.append(post).
+        invoke(result -> logger.infof("[%s] Post has been cached %s", correlationId, post))
+        .onFailure()
+        .invoke(throwable -> logger.errorf("[%s] Post %s could not be cached. %s", correlationId,
+            throwable))
+        .subscribe()
+        .with(x -> {
+        }, ProviderLogging.log::failureEmittingMessage);
+  }
 }
