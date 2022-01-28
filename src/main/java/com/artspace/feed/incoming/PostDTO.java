@@ -1,4 +1,4 @@
-package com.artspacepost.feed.incoming;
+package com.artspace.feed.incoming;
 
 import java.time.Instant;
 import java.util.Objects;

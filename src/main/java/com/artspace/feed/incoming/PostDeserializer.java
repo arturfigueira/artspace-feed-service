@@ -1,4 +1,4 @@
-package com.artspacepost.feed.incoming;
+package com.artspace.feed.incoming;
 
 import io.quarkus.kafka.client.serialization.ObjectMapperDeserializer;
 

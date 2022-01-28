@@ -1,4 +1,4 @@
-package com.artspacepost.feed.cache;
+package com.artspace.feed.cache;
 
 public interface CacheId {
   String getValue();

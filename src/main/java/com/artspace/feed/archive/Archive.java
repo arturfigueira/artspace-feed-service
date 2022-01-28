@@ -1,4 +1,4 @@
-package com.artspacepost.feed.archive;
+package com.artspace.feed.archive;
 
 import java.time.Instant;
 import javax.persistence.Entity;

@@ -1,8 +1,8 @@
-package com.artspacepost.feed.incoming;
+package com.artspace.feed.incoming;
 
-import com.artspacepost.feed.Post;
-import com.artspacepost.feed.archive.ArchiveService;
-import com.artspacepost.feed.cache.FeedCacheService;
+import com.artspace.feed.archive.ArchiveService;
+import com.artspace.feed.Post;
+import com.artspace.feed.cache.FeedCacheService;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.reactive.messaging.providers.i18n.ProviderLogging;
 import java.util.Optional;

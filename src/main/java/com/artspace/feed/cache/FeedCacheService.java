@@ -1,6 +1,6 @@
-package com.artspacepost.feed.cache;
+package com.artspace.feed.cache;
 
-import com.artspacepost.feed.Post;
+import com.artspace.feed.Post;
 import io.smallrye.mutiny.Uni;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;

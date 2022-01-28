@@ -1,4 +1,4 @@
-package com.artspacepost.feed.archive;
+package com.artspace.feed.archive;
 
 import io.quarkus.hibernate.reactive.panache.PanacheRepository;
 import javax.enterprise.context.ApplicationScoped;

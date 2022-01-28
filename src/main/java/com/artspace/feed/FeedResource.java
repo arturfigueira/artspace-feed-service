@@ -1,4 +1,4 @@
-package com.artspacepost.feed;
+package com.artspace.feed;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
