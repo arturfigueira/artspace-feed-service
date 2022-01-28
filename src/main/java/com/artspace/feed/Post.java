@@ -1,4 +1,4 @@
-package com.artspacepost.feed;
+package com.artspace.feed;
 
 import java.time.Instant;
 import javax.validation.constraints.NotBlank;

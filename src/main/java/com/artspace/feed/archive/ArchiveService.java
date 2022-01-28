@@ -1,6 +1,6 @@
-package com.artspacepost.feed.archive;
+package com.artspace.feed.archive;
 
-import com.artspacepost.feed.Post;
+import com.artspace.feed.Post;
 import io.quarkus.hibernate.reactive.panache.common.runtime.ReactiveTransactional;
 import io.smallrye.faulttolerance.api.FibonacciBackoff;
 import io.smallrye.mutiny.Uni;

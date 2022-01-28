@@ -1,4 +1,4 @@
-package com.artspacepost.feed.cache;
+package com.artspace.feed.cache;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -11,7 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.wildfly.common.Assert.assertTrue;
 
-import com.artspacepost.feed.Post;
+import com.artspace.feed.Post;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javafaker.Faker;

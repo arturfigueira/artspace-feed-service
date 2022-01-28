@@ -1,6 +1,6 @@
-package com.artspacepost.feed.archive;
+package com.artspace.feed.archive;
 
-import com.artspacepost.feed.Post;
+import com.artspace.feed.Post;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

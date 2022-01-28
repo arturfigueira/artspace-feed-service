@@ -1,4 +1,4 @@
-package com.artspacepost.feed.incoming;
+package com.artspace.feed.incoming;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -9,9 +9,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.artspacepost.feed.Post;
-import com.artspacepost.feed.archive.ArchiveService;
-import com.artspacepost.feed.cache.FeedCacheService;
+import com.artspace.feed.Post;
+import com.artspace.feed.archive.ArchiveService;
+import com.artspace.feed.cache.FeedCacheService;
 import com.github.javafaker.Faker;
 import io.smallrye.mutiny.Uni;
 import java.time.Duration;

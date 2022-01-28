@@ -1,6 +1,6 @@
-package com.artspacepost.feed.cache;
+package com.artspace.feed.cache;
 
-import com.artspacepost.feed.Post;
+import com.artspace.feed.Post;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.quarkus.redis.client.reactive.ReactiveRedisClient;
