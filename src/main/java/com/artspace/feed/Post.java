@@ -1,11 +1,13 @@
 package com.artspace.feed;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.ToString;
@@ -18,6 +20,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 @Getter
 @Builder
 @With
+@EqualsAndHashCode
 public class Post {
   private final String id;
 
@@ -30,9 +33,11 @@ public class Post {
   @NotBlank
   private final String author;
 
-  private final boolean isEnabled;
+  @NotNull
+  @JsonProperty(value="enabled")
+  private final Boolean isEnabled;
 
   public Instant getCreationTime() {
-    return Instant.ofEpochSecond(creationTime.getEpochSecond());
+    return creationTime == null ? null : Instant.ofEpochMilli(creationTime.toEpochMilli());
   }
 }
