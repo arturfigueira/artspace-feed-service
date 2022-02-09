@@ -7,6 +7,7 @@ import io.quarkus.redis.client.reactive.ReactiveRedisClient;
 import io.smallrye.faulttolerance.api.CircuitBreakerName;
 import io.smallrye.mutiny.Uni;
 import io.smallrye.reactive.messaging.providers.i18n.ProviderLogging;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import javax.inject.Inject;
@@ -30,7 +31,7 @@ import org.jboss.logging.Logger;
  * application.properties
  *
  * <p>How many posts can be cached per cache key can be configured via configuration property
- * {@code cache.service.max.entries.per.key}, set through application.properties
+ * {@code feed.items.per.page}, set through application.properties
  */
 @Singleton
 public class RedisFeedCacheService implements FeedCacheService {
@@ -49,12 +50,15 @@ public class RedisFeedCacheService implements FeedCacheService {
   @ConfigProperty(name = "cache.service.enabled", defaultValue = "true")
   boolean cacheEnabled;
 
-  @ConfigProperty(name = "cache.service.max.entries.per.key", defaultValue = "10")
+  @ConfigProperty(name = "feed.items.per.page", defaultValue = "10")
   long maxCachedEntries;
 
 
   /**
    * {@inheritDoc}
+   * <p>
+   * Append will add the cached items into a FIFO structure, where the most recent elements will be
+   * at the bottom of the list. Each cached key will represent the page zero of the feed.
    * <p>
    * If cache is disabled it will return a {@link Uni} with {@code true} After the append occurs the
    * method will perform a trim operation to guarantee that the list size doesn't grow indefinitely
@@ -70,7 +74,7 @@ public class RedisFeedCacheService implements FeedCacheService {
   public Uni<Boolean> append(final @NotNull @Valid Post post) {
     var result = Uni.createFrom().item(true);
     if (cacheEnabled) {
-      final var cacheId = new FeedCacheId("all");
+      final var cacheId = FeedCacheId.ALL;
       result = doAppend(cacheId, post)
           .invoke(length -> trim(cacheId, length))
           .map(listLength -> listLength > 0);
@@ -78,6 +82,57 @@ public class RedisFeedCacheService implements FeedCacheService {
       logger.warn("Caching is disabled. Ignoring cache request and returning default value true");
     }
     return result;
+  }
+
+  /**
+   * {@inheritDoc}
+   * <p>
+   * As the cached list works as a FIFO structure, the list will return the n most recent cached
+   * items. The method won`t remove the items from the list.
+   * <p>
+   * If there are no cached items an empty list will be returned within an Uni.
+   * <p>
+   * If the number of request elements are greater than the {@link RedisFeedCacheService#maxCachedEntries}
+   * a failed {@code Uni} will be returned with an {@link IllegalArgumentException}
+   *
+   * @param size number of elements to be returned
+   * @return A {@link Uni} that will resolve into the list with the last cached items.
+   */
+  @Override
+  public Uni<List<Post>> list(long size) {
+    Uni<List<Post>> result = Uni.createFrom().item(Collections.emptyList());
+
+    if (size > this.maxCachedEntries) {
+      result = Uni.createFrom().failure(new IllegalArgumentException(
+          "Incorrect list range. Requested " + size + ", max allowed " + this.maxCachedEntries));
+    }
+
+    if (cacheEnabled) {
+      result = lRange(size);
+    }
+
+    return result;
+  }
+
+  @Timeout()
+  @Fallback(fallbackMethod = "lRangeFallback")
+  protected Uni<List<Post>> lRange(long size) {
+    return this.redisClient
+        .lrange(FeedCacheId.ALL.getValue(), "0", Long.toString(size - 1))
+        .map(response -> this.serialize(response.toString()));
+  }
+
+  private List<Post> serialize(String response) {
+    try {
+      return objectMapper.readerForListOf(Post.class).readValue(response);
+    } catch (JsonProcessingException ex) {
+      logger.errorf("Unable to serialize response", ex);
+      return Collections.emptyList();
+    }
+  }
+
+  protected Uni<List<Post>> lRangeFallback(long size) {
+    return Uni.createFrom().item(Collections.emptyList());
   }
 
   @Timeout()
@@ -117,7 +172,7 @@ public class RedisFeedCacheService implements FeedCacheService {
   private void trim(final CacheId id, final Long listSize) {
     if (listSize > this.maxCachedEntries) {
       this.redisClient
-          .ltrim(id.getValue(), "0", Long.toString(this.maxCachedEntries-1))
+          .ltrim(id.getValue(), "0", Long.toString(this.maxCachedEntries - 1))
           .map(Optional::ofNullable)
           .map(result -> result.map(response -> response.toString().contains(PUSH_SUCCESS))
               .orElse(false))

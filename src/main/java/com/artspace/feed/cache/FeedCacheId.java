@@ -13,6 +13,8 @@ class FeedCacheId implements CacheId {
 
   private static final String PREFIX = "fdd-";
 
+  public static final CacheId ALL = new FeedCacheId("all");
+
   private final String value;
 
   public FeedCacheId(String id) {
