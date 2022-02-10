@@ -102,6 +102,7 @@ class FeedService {
   }
 
   protected Uni<List<Post>> fromArchiveFallback(final PageRequest request) {
+    logger.warnf("[%s] Fallback activated for request page %s", request.correlationId, request.index);
     return Uni.createFrom().item(Collections.emptyList());
   }
 
